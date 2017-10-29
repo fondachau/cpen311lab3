@@ -242,13 +242,34 @@
                     ; The interrupt is used purely to provide a 1 second heart beat binary counter pattern
                     ; on the 8 LEDs.
                     ;
-               ISR: STORE s0, ISR_preserve_s0           ;preserve register
-                    FETCH s0, LED_pattern               ;read current counter value
-                    ADD s0, 01                          ;increment counter
-                    STORE s0, LED_pattern               ;store new counter value
-                    OUTPUT s0, LED_port                 ;display counter value on LEDs
-                    FETCH s0, ISR_preserve_s0           ;restore register
-                    RETURNI ENABLE
+               ISR: 
+			   
+			   ;STORE s0, ISR_preserve_s0           ;preserve register
+                ;    FETCH s0, LED_pattern               ;read current counter value
+                 ;   ADD s0, 01                          ;increment counter
+                  ;  STORE s0, LED_pattern               ;store new counter value
+                   ; OUTPUT s0, LED_port                 ;display counter value on LEDs
+                    ;FETCH s0, ISR_preserve_s0           ;restore register
+                    
+					
+					
+					STORE s0, ISR_preserve_s0           ;preserve register
+					STORE s1, ISR_preserve_s1           ;preserve register
+					STORE s2, ISR_preserve_s2           ;preserve register
+					STORE s3, ISR_preserve_s3           ;preserve register
+					STORE s4, ISR_preserve_s4           ;preserve register
+					
+					
+					
+					
+					
+					FETCH s0, ISR_preserve_s0           ;restore register
+                    FETCH s1, ISR_preserve_s1           ;restore register
+                    FETCH s2, ISR_preserve_s2           ;restore register
+                    FETCH s3, ISR_preserve_s3           ;restore register
+                    FETCH s4, ISR_preserve_s4           ;restore register
+                
+					RETURNI ENABLE
                     ;
                     ;
                     ;**************************************************************************************
