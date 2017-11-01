@@ -1,9 +1,10 @@
+;not tested yet, will test tomorrow
 ISR: 	STORE s0, ISR_preserve_s0           ;preserve register, s0 is counter		
 	STORE s1, ISR_preserve_s1			;same ^, s1 is flash data
 	STORE s2, ISR_preserve_s2			;same ^, s2 is bit 0-7
 	STORE s3, ISR_preserve_s3			;same ^, s3 is bit 8-16
 	FETCH s0, LED_Counter               ;read current counter value
-	FETCH s1, ;inputflash				;s1 will be flash data
+	FETCH s1, ;inputflash don't know how to get				;s1 will be flash data
 	FETCH s2, LED_Pattern0
 	FETCH s2, LED_Pattern1
                     
