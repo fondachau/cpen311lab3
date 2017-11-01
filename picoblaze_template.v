@@ -9,6 +9,7 @@ parameter clk_freq_in_hz = 25000000
 				output reg[7:0] led,
 				output reg led1,
 				input clk,
+				input clk_readdata,
 				input [7:0] input_data
 			     );
 
@@ -41,8 +42,6 @@ reg event_1hz;
 //--
 //--
 
-reg        lcd_rw_control;
-reg[7:0]   lcd_output_data;
 pacoblaze3 led_8seg_kcpsm
 (
                   .address(address),
@@ -86,19 +85,6 @@ pacoblaze3 led_8seg_kcpsm
 
 // Note that because we are using clock enable we DO NOT need to synchronize with clk
 
-  always @ (posedge clk)
-  begin
-      //--divide 50MHz by 50,000,000 to form 1Hz pulses
-      if (int_count==(clk_freq_in_hz-1)) //clock enable
-		begin
-         int_count <= 0;
-         event_1hz <= 1;
-      end else
-		begin
-         int_count <= int_count + 1;
-         event_1hz <= 0;
-      end
- end
 
  always @ (posedge clk or posedge interrupt_ack)  //FF with clock "clk" and reset "interrupt_ack"
  begin
@@ -106,7 +92,7 @@ pacoblaze3 led_8seg_kcpsm
             interrupt <= 0;
       else
 		begin 
-		      if (event_1hz)   //clock enable
+		      if (event_dataread)   //clock enable
       		      interrupt <= 1;
           		else
 		            interrupt <= interrupt;
@@ -146,6 +132,8 @@ end
         if (write_strobe & port_id[7])  //clock enable 
           led <= out_port;
      
+        else if (write_strobe & port_id[6])  //clock enable 
+          led1 <= out_port;
   end
 
 
