@@ -1,0 +1,33 @@
+               ISR: STORE s0, ISR_preserve_s0           ;preserve register, s0 is counter
+					STORE s1, ISR_preserve_s1			;same ^, s1 is flash data
+					STORE s2, ISR_preserve_s2			;same ^, s2 is bit 0-7
+					STORE s3, ISR_preserve_s3			;same ^, s3 is bit 8-16
+                    FETCH s0, LED_Counter               ;read current counter value
+					FETCH s1, ;inputflash				;s1 will be flash data
+					FETCH s2, LED_Pattern0
+					FETCH s2, LED_Pattern1
+                    
+
+					ADD s2,s1
+					JUMP NC, no_carry
+					ADD s3, 01							;s2 is 0-7 bits and s3 is 8-16
+		  no_carry: ADD s0, 01                          ;increment counter
+					COMPARE s0, 100						;if s0= 256 or 0x100 will set ZERO flag
+					CALL Z, AvgDisp						;
+					
+					STORE s0, LED_Counter              ;store new counter value
+					STORE s2, LED_Pattern0
+					STORE s3, LED_Pattern1
+                    OUTPUT s0, LED_port                 ;display counter value on LEDs
+					
+                    FETCH s0, ISR_preserve_s0           ;restore register
+					FETCH s1, ISR_preserve_s1
+					FETCH s2, ISR_preserve_s2
+					FETCH s3, ISR_preserve_s3
+                    RETURNI ENABLE						;return from interupt
+                    ;
+		   
+		   AvgDisp: OUTPUT s3, LED_port
+					LOAD s3, 00
+					LOAD s2, 00
+					RETURN
