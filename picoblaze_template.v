@@ -8,6 +8,8 @@ parameter clk_freq_in_hz = 25000000
 ) (
 				output reg[7:0] led,
 				output reg led1,
+				output reg [7:0] LED_portadd,
+				output reg [7:0] LED_portadd1,
 				input clk,
 				input clk_readdata,
 				input [7:0] input_data
@@ -132,8 +134,13 @@ end
         if (write_strobe & port_id[7])  //clock enable 
           led <= out_port;
      
-        if (write_strobe & port_id[6])  //clock enable 
+        else if (write_strobe & port_id[6])  //clock enable 
           led1 <= out_port;
+		else if (write_strobe & port_id[5])  //clock enable 
+          LED_portadd <= out_port; 
+		  		else if (write_strobe & port_id[4])  //clock enable 
+          LED_portadd1 <= out_port; 
+		  
   end
 
 
