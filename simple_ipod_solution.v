@@ -262,6 +262,7 @@ newclock_doublsync
 .reset(1'b1));
 logic [7:0] LED_portadd;
 logic [7:0] LED_portadd1;
+logic [7:0] average;
 picoblaze_template
 #(
 .clk_freq_in_hz(50000000)
@@ -271,6 +272,7 @@ picoblaze_template_inst(
 						.led1(LED[0]),
 						.LED_portadd(LED_portadd[7:0]),
 						.LED_portadd1(LED_portadd1[7:0]),
+						.average(average),
                         .clk(CLK_50M),
 						.clk_readdata(edgeclock1),
                 .input_data(audiodata[15:8])
@@ -476,7 +478,7 @@ LCD_Scope_Encapsulated_pacoblaze_wrapper LCD_LED_scope(
                       .InF(flash_mem_readdata[31:24]),
                        .InE(flash_mem_readdata[23:16]),
                       .InD(flash_mem_readdata[15:8]),
-                      .InC(flash_mem_readdata[7:0]),
+                      .InC(average[7:0]),
                       .InB(LED_portadd[7:0]),
                      .InA(LED_portadd1[7:0]),
                           
