@@ -92,7 +92,7 @@ pacoblaze3 led_8seg_kcpsm
             interrupt <= 0;
       else
 		begin 
-		      if (event_dataread)   //clock enable
+		      if (clk_readdata)   //clock enable
       		      interrupt <= 1;
           		else
 		            interrupt <= interrupt;
@@ -132,7 +132,7 @@ end
         if (write_strobe & port_id[7])  //clock enable 
           led <= out_port;
      
-        else if (write_strobe & port_id[6])  //clock enable 
+        if (write_strobe & port_id[6])  //clock enable 
           led1 <= out_port;
   end
 
