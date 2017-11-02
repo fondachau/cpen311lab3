@@ -8,9 +8,12 @@ ISR: 	STORE s0, ISR_preserve_s0           ;preserve register, s0 is counter
 	FETCH s2, LED_Pattern0
 	FETCH s2, LED_Pattern1
                     
-
+	COMPARE s1,0
+	JUMP C, isnegative
 	ADD s2,s1
-	JUMP NC, no_carry
+	JUMP overflow
+isnegative: SUB s2, s1
+overflow: JUMP NC, no_carry
 	ADD s3, 01							;s2 is 0-7 bits and s3 is 8-16
 no_carry: ADD s0, 01                          ;increment counter
 	COMPARE s0, 100						;if s0= 256 or 0x100 will set ZERO flag
