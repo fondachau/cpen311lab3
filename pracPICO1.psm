@@ -13,9 +13,9 @@
                     ;
                     ;
                     ;
-                    CONSTANT LED_port, 80               ;8 simple LEDs. Is an OUTPUT port.
+                    CONSTANT LED_port, 80               ;binary1000_0000 output port[7] 8 simple LEDs. Is an OUTPUT port.
 			        CONSTANT DATA_IN_PORT, 00	        ;input data port. this is an INPUT port.
-					CONSTANT LED_PORT_LEDR0, 40
+					CONSTANT LED_PORT_LEDR0, 40		;binary0100_0000 output port[6]
                  
                     ;**************************************************************************************
                     ; Special Register usage
@@ -32,6 +32,15 @@
                     CONSTANT ISR_preserve_s1, 01        ;Preserve s1 contents during ISR
                     CONSTANT ISR_preserve_s2, 02        ;Preserve s2 contents during ISR
                     CONSTANT ISR_preserve_s3, 03        ;Preserve s3 contents during ISR
+                    CONSTANT ISR_preserve_s4, 04        ;Preserve s3 contents during ISR
+                    CONSTANT ISR_preserve_s5, 05        ;Preserve s0 contents during ISR
+                    CONSTANT ISR_preserve_s6, 06        ;Preserve s1 contents during ISR
+                    CONSTANT ISR_preserve_s7, 07        ;Preserve s2 contents during ISR
+                    CONSTANT ISR_preserve_s8, 08        ;Preserve s3 contents during ISR
+
+					CONSTANT LED_Counter,09              ;store new counter value
+					CONSTANT LED_Pattern0,0A
+					CONSTANT LED_Pattern1, 0B
                     ;
                     CONSTANT LED_pattern, 04            ;remember state of LEDs (8-bit counter in this case)
                    
@@ -149,6 +158,7 @@
         cold_start: LOAD s0, 00                         ;clear 1 second counter and clear LEDs
                     STORE s0, LED_pattern
                     OUTPUT s0, LED_port
+					OUTPUT S1, LED_PORT_LEDR0
                     ;
                     ENABLE INTERRUPT                    ;enable one second heart beat
                     ;
@@ -160,10 +170,10 @@
                     ; Display welcome message for design
                     ;
       main_program: LOAD s0, 01
-					OUTPUT s0, LED_port
+					OUTPUT s0, LED_PORT_LEDR0
 					CALL delay_1s
 					LOAD s0,00
-					OUTPUT s0, LED_port
+					OUTPUT s0, LED_PORT_LEDR0
 					CALL delay_1s
 					jump main_program
 					
@@ -242,13 +252,113 @@
                     ; The interrupt is used purely to provide a 1 second heart beat binary counter pattern
                     ; on the 8 LEDs.
                     ;
-               ISR: STORE s0, ISR_preserve_s0           ;preserve register
-                    FETCH s0, LED_pattern               ;read current counter value
-                    ADD s0, 01                          ;increment counter
-                    STORE s0, LED_pattern               ;store new counter value
-                    OUTPUT s0, LED_port                 ;display counter value on LEDs
-                    FETCH s0, ISR_preserve_s0           ;restore register
-                    RETURNI ENABLE
+               ISR: 
+			   
+			   ;STORE s0, ISR_preserve_s0           ;preserve register
+                ;    FETCH s0, LED_pattern               ;read current counter value
+                 ;   ADD s0, 01                          ;increment counter
+                  ;  STORE s0, LED_pattern               ;store new counter value
+                   ; OUTPUT s0, LED_port                 ;display counter value on LEDs
+                    ;FETCH s0, ISR_preserve_s0           ;restore register
+                    
+					;need to add 256 values and average it
+
+
+					
+					STORE s0, ISR_preserve_s0           ;preserve register
+					STORE s1, ISR_preserve_s1           ;preserve register
+					STORE s2, ISR_preserve_s2           ;preserve register
+					STORE s3, ISR_preserve_s3           ;preserve register
+					STORE s4, ISR_preserve_s4           ;preserve register
+					STORE s5, ISR_preserve_s5           ;preserve register
+					STORE s6, ISR_preserve_s6           ;preserve register
+					STORE s7, ISR_preserve_s7           ;preserve register
+					STORE s8, ISR_preserve_s8           ;preserve register
+
+					; determin sign
+					; if bigger than 1000_0000 then the number is negative
+					; if less than add
+					;if greater than, add
+					;have a counter of 256
+					;shift 8 times for divide?
+					FETCH s0, LED_Counter               ;read current counter value
+					INPUT s1,DATA_IN_PORT     		;get status of switches
+					FETCH s2, LED_Pattern0
+					FETCH s3, LED_Pattern1
+                    
+					COMPARE s1,80
+					JUMP C, isnegative
+					ADD s2,s1
+					JUMP overflow
+		isnegative: SUB s2, s1
+		overflow:	JUMP NC, no_carry
+					ADD s3, 01							;s2 is 0-7 bits and s3 is 8-16
+		no_carry: 	ADD s0, 01                          ;increment counter
+					COMPARE s0, FF						;if s0= 256 or 0x100 will set ZERO flag
+					CALL Z, AvgDisp						;
+					
+					STORE s0, LED_Counter              ;store new counter value
+					STORE s2, LED_Pattern0
+					STORE s3, LED_Pattern1
+					;OUTPUT s0, LED_port                 ;display counter value on LEDs
+                    
+					FETCH s0, ISR_preserve_s0           ;restore register
+                    FETCH s1, ISR_preserve_s1           ;restore register
+                    FETCH s2, ISR_preserve_s2           ;restore register
+                    FETCH s3, ISR_preserve_s3           ;restore register
+                    FETCH s4, ISR_preserve_s4           ;restore register
+					FETCH s5, ISR_preserve_s5           ;restore register
+                    FETCH s6, ISR_preserve_s6           ;restore register
+                    FETCH s7, ISR_preserve_s7           ;restore register
+                    FETCH s8, ISR_preserve_s8           ;restore register
+                    
+					RETURNI ENABLE
+					
+		AvgDisp: 	LOAD S4,S2
+					LOAD S5,S3;only use S5 cause after diving 256
+					COMPARE S5,80
+					JUMP NC, check40
+					LOAD S5, FF
+					JUMP DISPLAY
+					
+		check40:	COMPARE S5,80
+					JUMP NC, check20
+					LOAD S5, FE
+					JUMP DISPLAY
+					
+		check20:	COMPARE S5,80
+					JUMP NC, check10
+					LOAD S5, FC	
+					JUMP DISPLAY
+					
+		check10:	COMPARE S5,80
+					JUMP NC, check8
+					LOAD S5, F8	
+					JUMP DISPLAY
+					
+		check8:		COMPARE S5,80
+					JUMP NC, check4
+					LOAD S5, F0
+					JUMP DISPLAY
+					
+		check4:		COMPARE S5,80
+					JUMP NC, check2
+					LOAD S5, E0
+					JUMP DISPLAY
+					
+		check2:		COMPARE S5,80
+					JUMP NC, check1
+					LOAD S5, C0			
+					JUMP DISPLAY
+
+		check1:		LOAD S5, 80
+		
+		DISPLAY:	OUTPUT S5, LED_port
+					LOAD s3, 00
+					LOAD s2, 00
+					LOAD s1, 00
+					LOAD s0, 00
+					RETURN
                     ;
                     ;
                     ;**************************************************************************************
