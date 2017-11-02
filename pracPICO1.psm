@@ -16,7 +16,8 @@
                     CONSTANT LED_port, 80               ;binary1000_0000 output port[7] 8 simple LEDs. Is an OUTPUT port.
 			        CONSTANT DATA_IN_PORT, 00	        ;input data port. this is an INPUT port.
 					CONSTANT LED_PORT_LEDR0, 40		;binary0100_0000 output port[6]
-                 
+					CONSTANT LED_portadd, 20
+					CONSTANT LED_portadd1, 10
                     ;**************************************************************************************
                     ; Special Register usage
                     ;**************************************************************************************
@@ -287,10 +288,12 @@
 					FETCH s3, LED_Pattern1
                     
 					COMPARE s1,80
-					JUMP C, isnegative
+					JUMP NC, isnegative
 					ADD s2,s1
 					JUMP overflow
-		isnegative: SUB s2, s1
+		isnegative: SUB s1, 01               ;if negative, then do 2's complement to make it positive
+                    XOR s1, FF
+                    ADD s2, s1
 		overflow:	JUMP NC, no_carry
 					ADD s3, 01							;s2 is 0-7 bits and s3 is 8-16
 		no_carry: 	ADD s0, 01                          ;increment counter
@@ -323,41 +326,46 @@
 					
 		check40:	COMPARE S5,80
 					JUMP NC, check20
-					LOAD S5, FE
+					LOAD S6, FE
 					JUMP DISPLAY
 					
 		check20:	COMPARE S5,80
 					JUMP NC, check10
-					LOAD S5, FC	
+					LOAD S6, FC	
 					JUMP DISPLAY
 					
 		check10:	COMPARE S5,80
 					JUMP NC, check8
-					LOAD S5, F8	
+					LOAD S6, F8	
 					JUMP DISPLAY
 					
 		check8:		COMPARE S5,80
 					JUMP NC, check4
-					LOAD S5, F0
+					LOAD S6, F0
 					JUMP DISPLAY
 					
 		check4:		COMPARE S5,80
 					JUMP NC, check2
-					LOAD S5, E0
+					LOAD S6, E0
 					JUMP DISPLAY
 					
 		check2:		COMPARE S5,80
 					JUMP NC, check1
-					LOAD S5, C0			
+					LOAD S6, C0			
 					JUMP DISPLAY
 
-		check1:		LOAD S5, 80
+		check1:		LOAD S6, 80
 		
-		DISPLAY:	OUTPUT S5, LED_port
+		DISPLAY:	OUTPUT S6, LED_port
+					OUTPUT S5, LED_portadd
+					OUTPUT S4, LED_portadd1
 					LOAD s3, 00
 					LOAD s2, 00
 					LOAD s1, 00
 					LOAD s0, 00
+					LOAD s4, 00
+					LOAD s5, 00
+					LOAD s6, 00
 					RETURN
                     ;
                     ;
