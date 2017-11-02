@@ -123,7 +123,7 @@ output                      DRAM_WE_N;
 //=======================================================
 // Input and output declarations
 logic CLK_50M;
-logic  [7:0] LED;
+logic  [9:0] LED;
 assign CLK_50M =  CLOCK_50;
 assign LEDR[7:0] = LED[7:0];
 
@@ -264,13 +264,13 @@ newclock_doublsync
 
 picoblaze_template
 #(
-.clk_freq_in_hz(25000000)
+.clk_freq_in_hz(50000000)
 ) 
 picoblaze_template_inst(
                         .led(LED[9:2]),
 						.led1(LED[0]),
-                        .clk(CLK_25),
-						.clk_readdata(edgeclock1),
+                        .clk(CLK_50M),
+						.clk_readdata(flash_mem_readdatavalid),
                 .input_data(audiodata[15:8])
                  );
                                          
@@ -1108,7 +1108,7 @@ parameter character_exclaim=8'h21;          //'!'
 	//ANDing the keyboard input with the ASCII representation of the characters
 	//Then using unary reduction to see if input == specified character
 		assign D = (character_D == kbd)| (character_lowercase_d == kbd);
-		assign E = (character_E == kbd)| (character_lowercase_e == kbd);
+		assign E = 1'b1;
 		assign B = (character_B == kbd)| (character_lowercase_b == kbd);
 		assign F = (character_F == kbd)| (character_lowercase_f == kbd);
 		assign R = (character_R == kbd)| (character_lowercase_r == kbd);
