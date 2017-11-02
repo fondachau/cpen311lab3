@@ -18,6 +18,7 @@
 					CONSTANT LED_PORT_LEDR0, 40		;binary0100_0000 output port[6]
 					CONSTANT LED_portadd, 20
 					CONSTANT LED_portadd1, 10
+					CONSTANT average,08
                     ;**************************************************************************************
                     ; Special Register usage
                     ;**************************************************************************************
@@ -283,10 +284,10 @@
 					;have a counter of 256
 					;shift 8 times for divide?
 					FETCH s0, LED_Counter               ;read current counter value
-					INPUT s1,DATA_IN_PORT     		;get status of switches
 					FETCH s2, LED_Pattern0
 					FETCH s3, LED_Pattern1
-                    
+					
+                    INPUT s1,DATA_IN_PORT     		;get input
 					COMPARE s1,80
 					JUMP NC, isnegative
 					ADD s2,s1
@@ -320,45 +321,46 @@
 		AvgDisp: 	LOAD S4,S2
 					LOAD S5,S3;only use S5 cause after diving 256
 					COMPARE S5,80
-					JUMP NC, check40
-					LOAD S5, FF
+					JUMP C, check40
+					LOAD S6, FF
 					JUMP DISPLAY
 					
-		check40:	COMPARE S5,80
-					JUMP NC, check20
+		check40:	COMPARE S5,40
+					JUMP C, check20
 					LOAD S6, FE
 					JUMP DISPLAY
 					
-		check20:	COMPARE S5,80
-					JUMP NC, check10
+		check20:	COMPARE S5,20
+					JUMP C, check10
 					LOAD S6, FC	
 					JUMP DISPLAY
 					
-		check10:	COMPARE S5,80
-					JUMP NC, check8
+		check10:	COMPARE S5,10
+					JUMP C, check8
 					LOAD S6, F8	
 					JUMP DISPLAY
 					
-		check8:		COMPARE S5,80
-					JUMP NC, check4
+		check8:		COMPARE S5,08
+					JUMP C, check4
 					LOAD S6, F0
 					JUMP DISPLAY
 					
-		check4:		COMPARE S5,80
-					JUMP NC, check2
+		check4:		COMPARE S5,04
+					JUMP C, check2
 					LOAD S6, E0
 					JUMP DISPLAY
 					
-		check2:		COMPARE S5,80
-					JUMP NC, check1
+		check2:		COMPARE S5,02
+					JUMP C, check1
 					LOAD S6, C0			
 					JUMP DISPLAY
 
-		check1:		LOAD S6, 80
+		check1:		LOAD S6, 01
 		
 		DISPLAY:	OUTPUT S6, LED_port
 					OUTPUT S5, LED_portadd
 					OUTPUT S4, LED_portadd1
+					OUTPUT S3, average
 					LOAD s3, 00
 					LOAD s2, 00
 					LOAD s1, 00
